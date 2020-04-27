@@ -1,5 +1,6 @@
 package com.zhiyuntcm.opencv3demo;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +37,11 @@ public class MainActivity extends AppCompatActivity {
     private int[] pix;
 
     private int w,h;
+
+    private InputStream is;
+    private FileOutputStream os = null;
+    private File cascadeDir;
+    private File mCascadeFile;
 
     public class GetJsonDataUtil {
 
@@ -95,6 +102,27 @@ public class MainActivity extends AppCompatActivity {
         return strBase64;
     }
 
+    public void loadModelFile(InputStream is, String filename)
+    {
+        cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
+        mCascadeFile = new File(cascadeDir, filename);
+        try {
+            os = new FileOutputStream(mCascadeFile);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            is.close();
+            os.close();
+//            cascadeDir.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("gebilaolitou", "Failed to load cascade. Exception thrown: " + e);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        String base64str = GetImageStr("cc06_600.jpg");
+        String base64str = GetImageStr("pos2.jpg");
         byte[] b = Base64.decode(base64str.getBytes(), Base64.DEFAULT);
         img = BitmapFactory.decodeByteArray(b, 0, b.length);
 
@@ -122,6 +150,30 @@ public class MainActivity extends AppCompatActivity {
 //        TextView tv = findViewById(R.id.sample_text);
 //        tv.setText(stringFromJNI());
 
+        is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt2);
+        loadModelFile(is, "haarcascade_frontalface_alt2.xml");
+        String cascadeFace = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.svm_facecomplexion);
+        loadModelFile(is, "svm_facecomplexion.xml");
+        String svmFace = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.facegloss_model);
+        loadModelFile(is, "facegloss_model.xml");
+        String glossFace = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.haarcascade_lip);
+        loadModelFile(is, "haarcascade_lip.xml");
+        String cascadeLip = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.svm_lipcolor);
+        loadModelFile(is, "svm_lipcolor.xml");
+        String svmLip = mCascadeFile.getAbsolutePath();
+
+        TextView tv = findViewById(R.id.sample_text);
+        long current2 = System.currentTimeMillis();
+        String rstFace = tcmFacePro(pix, w, h, cascadeFace, svmFace, glossFace, cascadeLip, svmLip);
+        Log.i("gebilaolitou", "rstFace="+rstFace);
+        tv.setText(rstFace);
+        long performance2 = System.currentTimeMillis() - current2;
+        Log.i("gebilaolitou","time_faceDetect="+performance2);
+
 
         mButton_animation = (Button) findViewById(R.id.animation);
         mButton_animation.setOnClickListener(new View.OnClickListener(){
@@ -130,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
                 //animation
                 long current = System.currentTimeMillis();
 
-                int[] resultInt = animationFaceMask(pix, w, h);
+//                int[] resultInt = animationFaceMask(pix, w, h);
+                int[] resultInt = {0};
 
                 Bitmap resultImg = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
                 resultImg.setPixels(resultInt, 0, w, 0, 0, w, h);
@@ -146,5 +199,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public native String stringFromJNI();
 
-    public static native int[] animationFaceMask(int[] pixels,int w,int h);
+//    public static native int[] animationFaceMask(int[] pixels,int w,int h);
+
+    public static native String tcmFacePro(int[] pixels,int w,int h,String cascadeFileName, String svmFace, String glossFace, String cascadeLip, String svmLip);
+
 }

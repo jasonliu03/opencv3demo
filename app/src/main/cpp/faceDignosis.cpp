@@ -1,15 +1,17 @@
 #include "faceDignosis.h"
 #include "GMM.h"
 #include "RemoveNoise.h"
+#include "../jni/include/Global.h"
+
+char const* cascade_name = 0;
 CvRect lipRect;
 CvMemStorage* storageL;
 CvHaarClassifierCascade* cascadeL;
 double roiScale2 = 1.0;
-char const* cascade_nameL;
+char const* cascade_nameL = 0;
 IplImage* imageSrcL;
 CvMemStorage* storage;
 CvHaarClassifierCascade* cascade;
-char const* cascade_name;
 IplImage* imageSrc;
 CvRect faceRect;
 IplImage* inputImage;
@@ -49,9 +51,17 @@ int cptz(const CvScalar lipColor) {
 	else {
 		Mat testDataMat(1, 3, CV_32FC1, feature);
 		//CvSVM svm = CvSVM();
-		CvSVM svm;
-		svm.load(colorClassifierPathNameZ);
-		response = (int)svm.predict(testDataMat);
+//		CvSVM svm;
+//		svm.load(colorClassifierPathNameZ);
+//		response = (int)svm.predict(testDataMat);
+
+
+        Mat responses;
+//        Ptr<cv::ml::SVM> svm = SVM::create();
+        Ptr<cv::ml::SVM> svm = cv::ml::StatModel::load<cv::ml::SVM>(colorClassifierPathNameZ); //è¯»å–æ¨¡åž‹
+        svm->predict(testDataMat, responses);
+        responses.convertTo(responses,CV_32S);
+        response = responses.at<int>(0,0);
 	}
 	//Mat testDataMat(1, 3, CV_32FC1, feature);
 	////CvSVM svm = CvSVM();
@@ -105,7 +115,6 @@ bool prodp() {
 	}
 }
 void ldi(IplImage* imageSrc2) {
-	cascade_nameL = "haarcascade_lip.xml";
 	imageSrcL = cvCloneImage(imageSrc2);
 	if (storageL) {
 		cvReleaseMemStorage(&storageL);
@@ -136,7 +145,7 @@ bool detectLip() {
 			CV_HAAR_FIND_BIGGEST_OBJECT |
 			CV_HAAR_DO_ROUGH_SEARCH |
 			CV_HAAR_DO_CANNY_PRUNING,
-			cvSize(10, 10));         // Ò²¿ÉÄÜÊÇ 40*40 
+			cvSize(10, 10));         // Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 40*40 
 		cnt = lips->total;
 		for (int i = 0; i < (lips ? lips->total : 0); i++) {
 			r = (CvRect*)cvGetSeqElem(lips, i);
@@ -778,9 +787,16 @@ int copdt(const CvScalar skinColor) {
   } else {
     Mat testDataMat(1, 2, CV_32FC1, feature);
     //CvSVM svm = CvSVM();
-    CvSVM svm;
-    svm.load(colorClassifierPathName);
-    response = (int)svm.predict(testDataMat);
+//    CvSVM svm;
+//    svm.load(colorClassifierPathName);
+//    response = (int)svm.predict(testDataMat);
+
+      Mat responses;
+//        Ptr<cv::ml::SVM> svm = SVM::create();
+      Ptr<cv::ml::SVM> svm = cv::ml::StatModel::load<cv::ml::SVM>(colorClassifierPathName); //è¯»å–æ¨¡åž‹
+      svm->predict(testDataMat, responses);
+      responses.convertTo(responses,CV_32S);
+      response = responses.at<int>(0,0);
   }
   return response;
 }
@@ -823,7 +839,9 @@ CvScalar glopt(IplImage* inputImage) {
                                        faceImage->nChannels);
   cvCopy(faceImage, cheekImage);
   cvResetImageROI(faceImage);
-  Mat rszImageM, cheekImageTemp(cheekImage, 0);
+  Mat rszImageM;
+  Mat cheekImageTemp;
+  cheekImageTemp = cvarrToMat(cheekImage); //testj
   resize(cheekImageTemp, rszImageM, Size(W, H), 0, 0);
   Mat HSVImageM;
   cvtColor(rszImageM, HSVImageM, CV_RGB2HSV);
@@ -1067,7 +1085,6 @@ IplImage* gtlm() { return lipExtractMask; }
 IplImage* gtli() { return lipExtractImage; }
 
 void faii(IplImage* imageSrc1) {
-  cascade_name = "haarcascade_frontalface_alt2.xml";
 
   imageSrc = cvCloneImage(imageSrc1);
   if (storage) {

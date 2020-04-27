@@ -1,4 +1,10 @@
 #include "Global.h"
+
+extern char const* cascade_name;
+extern char const* colorClassifierPathName;
+extern char const* glossModelPathName;
+extern char const* cascade_nameL;
+extern char const* colorClassifierPathNameZ;
 CvScalar efscf();
 void faii(IplImage* imageSrc1);
 IplImage* gfsi();
@@ -11,7 +17,7 @@ int lpdt(IplImage* faceDown_Gray);
 void bcmm();
 void ccpm();
 bool dtlr(IplImage*& image_LipBi,CvRect& rect_Lip);
-void fsdmm(IplImage* src,const int haarFaceDetectSwitch=0);
+void fsdmm(IplImage* src,const int haarFaceDetectSwitch);
 void dysal(const IplImage* inputImage);
 int copdt(const CvScalar skinColor);
 CvScalar glopt(IplImage* inputImage);
