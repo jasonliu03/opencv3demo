@@ -61,3 +61,8 @@ void tccr(const IplImage* tongueCoatImage1);
 CvScalar etccf();
 int ccopd(const CvScalar coatColor);
 
+extern char const* cascade_nameS;
+extern char const* ccolorClassifierPathName;
+extern char const* bohouClassifierPathName;
+extern char const* panClassifierPathName;
+

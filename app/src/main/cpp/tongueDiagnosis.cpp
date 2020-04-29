@@ -1,8 +1,9 @@
 #include "tongueDiagnosis.h"
 #include "RemoveNoise.h"
+#include "GMM_face.h"
 CvMemStorage* storageS;
 CvHaarClassifierCascade* cascadeS;
-char const* cascade_nameS;
+char const* cascade_nameS = "haarcascade_tongue.xml";
 IplImage* imageSrcS;
 IplImage* inputImageS;
 IplImage* image_tongueROI;
@@ -34,7 +35,7 @@ int g;
 IplImage* inputImageshuiliu;
 IplImage* inputRoughness;
 IplImage* L;
-char const* panClassifierPathName;
+char const* panClassifierPathName = "svm_tonguefatthin.xml";
 IplImage* tongueImage;
 IplImage* tongueMask;
 IplImage* tongueCoat;
@@ -42,13 +43,15 @@ IplImage* tongueNature;
 IplImage* tongueCoatImage;
 IplImage* tongueNatureImage;
 float feature[2];
-char const* bohouClassifierPathName;
+char const* bohouClassifierPathName = "svm_tonguecoatthickness.xml";
 IplImage* tongueCoatImagecc;
-char const* ccolorClassifierPathName;
+char const* ccolorClassifierPathName = "svm_tonguecoatcolor.xml";
 double roiScale = 1.0;
 
+#define cvQueryHistValue_1D( hist, idx0 ) \
+    ((float)cvGetReal1D( (hist)->bins, (idx0)))
+
 void tccr(const IplImage* tongueCoatImage1) {
-  ccolorClassifierPathName = "svm_tonguecoatcolor.xml";
   tongueCoatImagecc = cvCloneImage(tongueCoatImage1);
 }
 int ccopd(const CvScalar coatColor) {
@@ -58,9 +61,15 @@ int ccopd(const CvScalar coatColor) {
   feature[1] = coatColor.val[2];
   Mat testDataMat(1, 2, CV_32FC1, feature);
   //CvSVM svm = CvSVM();
-  CvSVM svm;
-  svm.load(ccolorClassifierPathName);
-  response = (int)svm.predict(testDataMat);
+//  CvSVM svm;
+//  svm.load(ccolorClassifierPathName);
+//  response = (int)svm.predict(testDataMat);
+
+  Mat responses;
+  Ptr<cv::ml::SVM> svm = cv::ml::StatModel::load<cv::ml::SVM>(ccolorClassifierPathName); //è¯»å–æ¨¡åž‹
+  svm->predict(testDataMat, responses);
+  responses.convertTo(responses,CV_32S);
+  response = responses.at<int>(0,0);
   return response;
 }
 CvScalar etccf() {
@@ -467,30 +476,29 @@ CvScalar tsbd(IplImage* in, int& substanceResponse) {
   string shexiang_color = "";
 
   if (shexiang_color == "" && t1 <= 105) {
-    shexiang_color = "Éà°µºì";
+    shexiang_color = "ï¿½à°µï¿½ï¿½";
     substanceResponse = 0;
   }
   if (shexiang_color == "" && t2 <= 136) {
-    shexiang_color = "Éàµ­°×";
+    shexiang_color = "ï¿½àµ­ï¿½ï¿½";
     substanceResponse = 1;
   }
   if (shexiang_color == "" && t2 <= 140) {
-    shexiang_color = "Éàµ­ºì";
+    shexiang_color = "ï¿½àµ­ï¿½ï¿½";
     substanceResponse = 2;
   }
   if (shexiang_color == "" && t2 <= 148) {
-    shexiang_color = "Éàºì";
+    shexiang_color = "ï¿½ï¿½ï¿½";
     substanceResponse = 3;
   }
   if (shexiang_color == "" && t2 > 148) {
     substanceResponse = 4;
-    shexiang_color = "ÉàÉîºì";
+    shexiang_color = "ï¿½ï¿½ï¿½ï¿½ï¿½";
   }
 
   return tongueNatureColorFeature;
 }
 void tctd(IplImage* tongueCoatImage1, IplImage* tongueNatureImage1) {
-  bohouClassifierPathName = "svm_tonguecoatthickness.xml";
 
   tongueCoatImage = cvCloneImage(tongueCoatImage1);
   tongueNatureImage = cvCloneImage(tongueNatureImage1);
@@ -505,9 +513,14 @@ int prbh() {
   Mat testDataMat(1, 2, CV_32FC1, feature);
 
   //CvSVM svm = CvSVM();
-  CvSVM svm;
-  svm.load(bohouClassifierPathName);
-  response = (int)svm.predict(testDataMat);
+//  CvSVM svm;
+//  svm.load(bohouClassifierPathName);
+//  response = (int)svm.predict(testDataMat);
+  Mat responses;
+  Ptr<cv::ml::SVM> svm = cv::ml::StatModel::load<cv::ml::SVM>(bohouClassifierPathName); //è¯»å–æ¨¡åž‹
+  svm->predict(testDataMat, responses);
+  responses.convertTo(responses,CV_32S);
+  response = responses.at<int>(0,0);
   return response;
 }
 void tcns(IplImage* tongueImage1, IplImage* tongueMask1) {
@@ -752,7 +765,7 @@ int LSF(vector<CvPoint2D64f> vec, int index_power) {
 
   return pre_label;
 }
-void tftd() { panClassifierPathName = "svm_tonguefatthin.xml"; }
+void tftd() {}
 IplImage* fdrt(IplImage* image) {
   if (image == NULL) {
     std::cout << "read imagefailed" << std::endl;
@@ -788,9 +801,14 @@ int ttpt(float data[]) {
   int response;
   Mat testDataMat(1, 4, CV_32FC1, data);
 
-  CvSVM svm;
-  svm.load(panClassifierPathName);
-  response = (int)svm.predict(testDataMat);
+//  CvSVM svm;
+//  svm.load(panClassifierPathName);
+//  response = (int)svm.predict(testDataMat);
+  Mat responses;
+  Ptr<cv::ml::SVM> svm = cv::ml::StatModel::load<cv::ml::SVM>(panClassifierPathName); //è¯»å–æ¨¡åž‹
+  svm->predict(testDataMat, responses);
+  responses.convertTo(responses,CV_32S);
+  response = responses.at<int>(0,0);
   return response;
 }
 float power(float a, int n) {
@@ -1393,7 +1411,6 @@ int tcdd(IplImage* inputImage) {
   return nCracks;
 }
 void tdi(IplImage* imageSrc1) {
-  cascade_nameS = "haarcascade_tongue.xml";
 
   imageSrcS = cvCloneImage(imageSrc1);
   if (storageS) {
@@ -1649,6 +1666,7 @@ bool ppff() {
     tdi(imageScale);
     isDetectTongue = dddss();
     if (!isDetectTongue) {
+      cvReleaseImage(&imageScale);
       return isDetectTongue;
     }
     cvReleaseImage(&imageScale);
@@ -1657,16 +1675,26 @@ bool ppff() {
   cgii();
   cgee();
   if (!ftcc()) {
-    return isDetectTongue;
+    //return isDetectTongue;
   }
   ctmm();
+
+  GMM *mGMM = bbmm(image_tongueROI);
+  IplImage *tmpImage_Gauss = ccpp(image_tongueROI, mGMM);
+  cvThreshold(tmpImage_Gauss,tmpImage_Gauss,0,255,CV_THRESH_BINARY);
+  cvMorphologyEx(tmpImage_Gauss, image_vMask, NULL, NULL,CV_MOP_OPEN,4);
+  RemoveNoise rn;
+  rn.LessConnectedRegionRemove(image_vMask,
+                               tmpImage_Gauss->height * tmpImage_Gauss->width / 8);
+
   sgtt();
 
   if (!ccmm()) {
-    return isDetectTongue;
+//    return isDetectTongue;
   }
 
-  return isDetectTongue;
+//  return isDetectTongue;
+  return true;
 }
 void cgii() {
   CvRect tmpTRect = gtrt();
@@ -1733,12 +1761,12 @@ void cgee() {
   IplImage* image_vPolarEdgeInverseOSTU = cvCreateImage(
       cvSize(image_tongueROI->width, image_tongueROI->height), IPL_DEPTH_8U, 1);
   cvThreshold(image_vPolarEdgeInverse, image_vPolarEdgeInverseOSTU, 0, 255,
-              CV_THRESH_BINARY | CV_THRESH_OTSU);  //¿É¿¼ÂÇ²ÉÓÃ´ó½òãÐÖµ
+              CV_THRESH_BINARY | CV_THRESH_OTSU);  //ï¿½É¿ï¿½ï¿½Ç²ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½Öµ
 
   RemoveNoise removeNoise;
   removeNoise.LessConnectedRegionRemove(image_vPolarEdgeInverseOSTU, 250);
 
-  IplImage* image_vClose = cvCreateImage(
+  IplImage *image_vClose = cvCreateImage(
       cvSize(image_tongueROI->width, image_tongueROI->height), IPL_DEPTH_8U, 1);
   cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_OPEN,4);
   cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_CLOSE,4);
@@ -1748,13 +1776,13 @@ void cgee() {
   cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_CLOSE,4);
   cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_ERODE,2);
   cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_DILATE,3);
-  //cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_DILATE,3);
+//  cvMorphologyEx(image_vPolarEdgeInverseOSTU, image_vClose, NULL, NULL,CV_MOP_DILATE,3);
 
   cvLogPolar(image_vClose, image_vBiPolar,
              cvPoint2D32f(image_v->width / 2, image_v->height / 2), M,
              CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS);
   cvThreshold(image_vBiPolar, image_vBiPolar, 0, 255,
-              CV_THRESH_BINARY | CV_THRESH_OTSU);  //¿É¿¼ÂÇ²ÉÓÃ´ó½òãÐÖµ
+              CV_THRESH_BINARY | CV_THRESH_OTSU);  //ï¿½É¿ï¿½ï¿½Ç²ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½Öµ
 
   cvReleaseImage(&image_vPolar);
   cvReleaseImage(&image_vPolarEdge);
@@ -2021,7 +2049,7 @@ void cftt(IplImage* image, IplImage* imageResult, CvPoint point_top,
           ((x_left == point_down.x) && (point_mid.y == point_down.y)) ||
           ((x_right == point_top.x) && (point_mid.y == point_top.y)) ||
           ((x_right == point_down.x) &&
-           (point_mid.y == point_down.y)))  //·ÀÖ¹ÏÝÈëµÝ¹éËÀÑ­»·
+           (point_mid.y == point_down.y)))  //ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½Ý¹ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½
       {
         point_mid.x = (point_top.x + point_down.x) / 2;
         point_mid.y = (point_top.y + point_down.y) / 2;

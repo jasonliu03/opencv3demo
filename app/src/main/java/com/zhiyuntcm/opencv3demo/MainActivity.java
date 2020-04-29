@@ -1,10 +1,15 @@
 package com.zhiyuntcm.opencv3demo;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -123,33 +128,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-
-
-        String base64str = GetImageStr("pos2.jpg");
-        byte[] b = Base64.decode(base64str.getBytes(), Base64.DEFAULT);
-        img = BitmapFactory.decodeByteArray(b, 0, b.length);
-
-        w = img.getWidth();
-        h = img.getHeight();
-        Log.i("gebilaolitou", "w,h="+w+h);
-        pix = new int[w * h];
-        img.getPixels(pix, 0, w, 0, 0, w, h);
-
-        imgView = (ImageView) this.findViewById(R.id.imageView);
-        imgView.setImageBitmap(img);
-
-        imgViewAfter = (ImageView) this.findViewById(R.id.imageViewAfter);
-
-
-        // Example of a call to a native method
-//        TextView tv = findViewById(R.id.sample_text);
-//        tv.setText(stringFromJNI());
-
+    public void faceDiagnosis()
+    {
         is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt2);
         loadModelFile(is, "haarcascade_frontalface_alt2.xml");
         String cascadeFace = mCascadeFile.getAbsolutePath();
@@ -172,8 +152,82 @@ public class MainActivity extends AppCompatActivity {
         Log.i("gebilaolitou", "rstFace="+rstFace);
         tv.setText(rstFace);
         long performance2 = System.currentTimeMillis() - current2;
-        Log.i("gebilaolitou","time_faceDetect="+performance2);
+        Log.i("gebilaolitou","time_faceDiagnosis="+performance2);
+    }
 
+    public void tongueDiagnosis()
+    {
+        is = getResources().openRawResource(R.raw.haarcascade_tongue);
+        loadModelFile(is, "haarcascade_tongue.xml");
+        String cascadeFaceS = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.svm_tonguecoatcolor);
+        loadModelFile(is, "svm_tonguecoatcolor.xml");
+        String ccolorClassifierPathName = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.svm_tonguecoatthickness);
+        loadModelFile(is, "svm_tonguecoatthickness.xml");
+        String bohouClassifierPathName = mCascadeFile.getAbsolutePath();
+        is = getResources().openRawResource(R.raw.svm_tonguefatthin);
+        loadModelFile(is, "svm_tonguefatthin.xml");
+        String panClassifierPathName = mCascadeFile.getAbsolutePath();
+
+        TextView tv = findViewById(R.id.sample_text);
+        long current2 = System.currentTimeMillis();
+        String rstTongue = tcmTonguePro(pix, w, h, cascadeFaceS, ccolorClassifierPathName, bohouClassifierPathName, panClassifierPathName);
+        Log.i("gebilaolitou", "rstTongue="+rstTongue);
+        tv.setText(rstTongue);
+        long performance2 = System.currentTimeMillis() - current2;
+        Log.i("gebilaolitou","time_tongueDiagnosis="+performance2);
+    }
+
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    //请求状态码
+    private static int REQUEST_PERMISSION_CODE = 1;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            for (int i = 0; i < permissions.length; i++) {
+                Log.i("gebilaolitou", "申请的权限为：" + permissions[i] + ",申请结果：" + grantResults[i]);
+            }
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
+            }
+        }
+
+
+        String base64str = GetImageStr("neg1.jpg");
+        byte[] b = Base64.decode(base64str.getBytes(), Base64.DEFAULT);
+        img = BitmapFactory.decodeByteArray(b, 0, b.length);
+
+        w = img.getWidth();
+        h = img.getHeight();
+        Log.i("gebilaolitou", "w,h="+w+h);
+        pix = new int[w * h];
+        img.getPixels(pix, 0, w, 0, 0, w, h);
+
+        imgView = (ImageView) this.findViewById(R.id.imageView);
+        imgView.setImageBitmap(img);
+
+        imgViewAfter = (ImageView) this.findViewById(R.id.imageViewAfter);
+
+
+        // Example of a call to a native method
+//        TextView tv = findViewById(R.id.sample_text);
+//        tv.setText(stringFromJNI());
+
+//        faceDiagnosis();
+        tongueDiagnosis();
 
         mButton_animation = (Button) findViewById(R.id.animation);
         mButton_animation.setOnClickListener(new View.OnClickListener(){
@@ -182,8 +236,8 @@ public class MainActivity extends AppCompatActivity {
                 //animation
                 long current = System.currentTimeMillis();
 
-//                int[] resultInt = animationFaceMask(pix, w, h);
-                int[] resultInt = {0};
+                int[] resultInt = animationTongueMask(pix, w, h);
+//                int[] resultInt = {0};
 
                 Bitmap resultImg = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
                 resultImg.setPixels(resultInt, 0, w, 0, 0, w, h);
@@ -200,7 +254,9 @@ public class MainActivity extends AppCompatActivity {
     public native String stringFromJNI();
 
 //    public static native int[] animationFaceMask(int[] pixels,int w,int h);
-
+    public static native int[] animationTongueSegmentation(int[] pixels,int w,int h);
+    public static native int[] animationTongueMask(int[] pixels,int w,int h);
     public static native String tcmFacePro(int[] pixels,int w,int h,String cascadeFileName, String svmFace, String glossFace, String cascadeLip, String svmLip);
+    public static native String tcmTonguePro(int[] pixels,int w,int h,String cascadeFileName, String ccolorClassifierPathName, String bohouClassifierPathName, String panClassifierPathName);
 
 }

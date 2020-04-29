@@ -31,10 +31,11 @@ add_library( # Sets the name of the library.
              src/main/cpp/GaussianFitter.cpp
              src/main/cpp/cluster.cpp
              src/main/cpp/GMM.cpp
-#             src/main/cpp/GMM_face.cpp
+             src/main/cpp/GMM_face.cpp
 
              src/main/cpp/RemoveNoise.cpp
              src/main/cpp/faceDignosis.cpp
+             src/main/cpp/tongueDiagnosis.cpp
              src/main/cpp/TCMProInterface.cpp
              src/main/cpp/imagehandle.cpp
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "Color.h"
 #include "GaussianFitter.h"
 #include <vector>

@@ -50,24 +50,13 @@ int cptz(const CvScalar lipColor) {
 	}
 	else {
 		Mat testDataMat(1, 3, CV_32FC1, feature);
-		//CvSVM svm = CvSVM();
-//		CvSVM svm;
-//		svm.load(colorClassifierPathNameZ);
-//		response = (int)svm.predict(testDataMat);
-
 
         Mat responses;
-//        Ptr<cv::ml::SVM> svm = SVM::create();
         Ptr<cv::ml::SVM> svm = cv::ml::StatModel::load<cv::ml::SVM>(colorClassifierPathNameZ); //读取模型
         svm->predict(testDataMat, responses);
         responses.convertTo(responses,CV_32S);
         response = responses.at<int>(0,0);
 	}
-	//Mat testDataMat(1, 3, CV_32FC1, feature);
-	////CvSVM svm = CvSVM();
-	//CvSVM svm;
-	//svm.load(colorClassifierPathNameZ);
-	//response = (int)svm.predict(testDataMat);
 	return response;
 }
 void lsgi(const IplImage* face) {

@@ -206,61 +206,61 @@ char* tcmFacePro(IplImage* input, int haarFaceDetectSwitch /*=0*/) {
   return const_cast<char*>(tcmFaceFeature.c_str());
 }
 
-//char* tcmTonguePro(IplImage* input, int haarTongueDetectSwitch /*=0*/) {
-//  string tongueDagnosisDataSet = "";
-//  int tongueDetectRes = 0;
-//  int tongueCrack = 0;
-//  int tongueFatThin = 0;
-//  int tongueCoatThickness = 0;
-//  int tongueCoatColor = 0;
-//  int tongueNatureColor = 0;
-//  IplImage* image_in = cvCloneImage(input);
-//  ttssii(image_in, haarTongueDetectSwitch);
-//  bool isOk = ppff();
-//  if (isOk) {
-//    tongueDetectRes = 1;
-//    IplImage* mmm = gtmm();
-//    IplImage* ttt = gtii();
-//    IplImage* tongueMIR = gtim();
-//    int nCracks = tcdd(tongueMIR);
-//    tongueDagnosisDataSet = toString(nCracks);
-//    if (nCracks > 0) {
-//      tongueCrack = 1;
-//    } else if (nCracks == 0) {
-//      tongueCrack = 0;
-//    }
-//    tftd();
-//    tongueFatThin = prdt(mmm);
-//    tcns(ttt, mmm);
-//    pffl();
-//    IplImage* tci = gtci();
-//    IplImage* tni = gtni();
-//    tctd(tci, tni);
-//    tongueCoatThickness = prbh();
-//    CvScalar tongueNatureColorFeature = tsbd(ttt, tongueNatureColor);
-//    tongueDagnosisDataSet +=
-//        "," + toString(cvRound(tongueNatureColorFeature.val[0])) + "," +
-//        toString(cvRound(tongueNatureColorFeature.val[1])) + "," +
-//        toString(cvRound(tongueNatureColorFeature.val[2]));
-//    tccr(tci);
-//    CvScalar tongueCoatColorFeature = etccf();
-//    tongueDagnosisDataSet +=
-//        "," + toString(cvRound(tongueCoatColorFeature.val[0])) + "," +
-//        toString(cvRound(tongueCoatColorFeature.val[1])) + "," +
-//        toString(cvRound(tongueCoatColorFeature.val[2]));
-//    tongueCoatColor = ccopd(tongueCoatColorFeature);
-//  } else {
-//    tongueDetectRes = 0;
-//    tongueDagnosisDataSet = "";
-//  }
-//  int result = 0;
-//  result = tongueDetectRes * 1 + tongueCrack * 10 + tongueFatThin * 100 +
-//           tongueCoatThickness * 1000 + tongueCoatColor * 10000 +
-//           tongueNatureColor * 100000;
-//  string resultStr = toString(result);
-//  static string tcmTongueFeature = "";
-//  tcmTongueFeature = resultStr + "," + tongueDagnosisDataSet;
-//  cvReleaseImage(&image_in);
-//  return const_cast<char*>(tcmTongueFeature.c_str());
-//}
+char* tcmTonguePro(IplImage* input, int haarTongueDetectSwitch /*=0*/) {
+  string tongueDagnosisDataSet = "";
+  int tongueDetectRes = 0;
+  int tongueCrack = 0;
+  int tongueFatThin = 0;
+  int tongueCoatThickness = 0;
+  int tongueCoatColor = 0;
+  int tongueNatureColor = 0;
+  IplImage* image_in = cvCloneImage(input);
+  ttssii(image_in, haarTongueDetectSwitch);
+  bool isOk = ppff();
+  if (isOk) {
+    tongueDetectRes = 1;
+    IplImage* mmm = gtmm();
+    IplImage* ttt = gtii();
+    IplImage* tongueMIR = gtim();
+    int nCracks = tcdd(tongueMIR);
+    tongueDagnosisDataSet = toString(nCracks);
+    if (nCracks > 0) {
+      tongueCrack = 1;
+    } else if (nCracks == 0) {
+      tongueCrack = 0;
+    }
+    tftd();
+    tongueFatThin = prdt(mmm);
+    tcns(ttt, mmm);
+    pffl();
+    IplImage* tci = gtci();
+    IplImage* tni = gtni();
+    tctd(tci, tni);
+    tongueCoatThickness = prbh();
+    CvScalar tongueNatureColorFeature = tsbd(ttt, tongueNatureColor);
+    tongueDagnosisDataSet +=
+        "," + toString(cvRound(tongueNatureColorFeature.val[0])) + "," +
+        toString(cvRound(tongueNatureColorFeature.val[1])) + "," +
+        toString(cvRound(tongueNatureColorFeature.val[2]));
+    tccr(tci);
+    CvScalar tongueCoatColorFeature = etccf();
+    tongueDagnosisDataSet +=
+        "," + toString(cvRound(tongueCoatColorFeature.val[0])) + "," +
+        toString(cvRound(tongueCoatColorFeature.val[1])) + "," +
+        toString(cvRound(tongueCoatColorFeature.val[2]));
+    tongueCoatColor = ccopd(tongueCoatColorFeature);
+  } else {
+    tongueDetectRes = 0;
+    tongueDagnosisDataSet = "";
+  }
+  int result = 0;
+  result = tongueDetectRes * 1 + tongueCrack * 10 + tongueFatThin * 100 +
+           tongueCoatThickness * 1000 + tongueCoatColor * 10000 +
+           tongueNatureColor * 100000;
+  string resultStr = toString(result);
+  static string tcmTongueFeature = "";
+  tcmTongueFeature = resultStr + "," + tongueDagnosisDataSet;
+  cvReleaseImage(&image_in);
+  return const_cast<char*>(tcmTongueFeature.c_str());
+}
 

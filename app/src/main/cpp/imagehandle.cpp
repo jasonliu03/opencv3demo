@@ -269,14 +269,6 @@ Mat tongueDivision(Mat tongueROI) {
 
 
 
-	cvLogPolar(image_v, image_vPolar,
-
-		cvPoint2D32f(image_v->width / 2, image_v->height / 2), M,
-
-		CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS);
-
-
-
 	IplImage* image_vBiPolarcftt = cvCreateImage(
 
 		cvSize(image_tongueROI->width, image_tongueROI->height), IPL_DEPTH_8U, 1);
@@ -314,6 +306,12 @@ Mat tongueDivision(Mat tongueROI) {
 	cvSplit(image_hsv, image_h, image_s, image_v, NULL);
 
 
+
+    cvLogPolar(image_v, image_vPolar,
+
+               cvPoint2D32f(image_v->width / 2, image_v->height / 2), M,
+
+               CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS);
 
 	for (int y = 0; y < image_vPolar->height; y++) {
 

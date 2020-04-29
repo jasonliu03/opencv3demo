@@ -1,41 +1,42 @@
 #include "opencv2/opencv.hpp"
 #include "GMM.h"
+#include "faceDignosis.h"
 
 using namespace std;
 using namespace cv;
 
 
-void cdbt(const IplImage* mask, const IplImage* grayImage, int& i_dark,
-          int& i_bright, double rate_dark, double rate_bright) {
-  float data[256] = {0};
-  int total = 0;
-  for (int y = 0; y < mask->height; y++) {
-    for (int x = 0; x < mask->width; x++) {
-      if (cvGetReal2D(mask, y, x) > 200) {
-        int intensity = cvRound(cvGetReal2D(grayImage, y, x));
-        data[intensity]++;
-        total++;
-      }
-    }
-  }
-
-  float sum_dark = 0;
-  for (int i = 0; i < 256; i++) {
-    sum_dark += data[i];
-    if ((sum_dark) / ((double)total) > rate_dark) {
-      i_dark = i;
-      break;
-    }
-  }
-  float sum_bright = 0;
-  for (int i = 255; i >= 0; i--) {
-    sum_bright += data[i];
-    if ((sum_bright) / ((double)total) > rate_bright) {
-      i_bright = i;
-      break;
-    }
-  }
-}
+//void cdbt(const IplImage* mask, const IplImage* grayImage, int& i_dark,
+//          int& i_bright, double rate_dark, double rate_bright) {
+//  float data[256] = {0};
+//  int total = 0;
+//  for (int y = 0; y < mask->height; y++) {
+//    for (int x = 0; x < mask->width; x++) {
+//      if (cvGetReal2D(mask, y, x) > 200) {
+//        int intensity = cvRound(cvGetReal2D(grayImage, y, x));
+//        data[intensity]++;
+//        total++;
+//      }
+//    }
+//  }
+//
+//  float sum_dark = 0;
+//  for (int i = 0; i < 256; i++) {
+//    sum_dark += data[i];
+//    if ((sum_dark) / ((double)total) > rate_dark) {
+//      i_dark = i;
+//      break;
+//    }
+//  }
+//  float sum_bright = 0;
+//  for (int i = 255; i >= 0; i--) {
+//    sum_bright += data[i];
+//    if ((sum_bright) / ((double)total) > rate_bright) {
+//      i_bright = i;
+//      break;
+//    }
+//  }
+//}
 
 GMM* bbmm(IplImage *faceImage) {
   int len;
